@@ -1,0 +1,26 @@
+{
+  "name": "basic-mern",
+  "version": "1.0.0",
+  "description": "A demonstration of how to implement a basic MERN application",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "concurrently \"node server.js\" \"cd client && npm start\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mmolash/basic-mern.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/mmolash/basic-mern/issues"
+  },
+  "homepage": "https://github.com/mmolash/basic-mern#readme",
+  "dependencies": {
+    "body-parser": "^1.18.3",
+    "concurrently": "^4.1.0",
+    "express": "^4.16.4",
+    "mongoose": "^5.4.15"
+  }
+}
