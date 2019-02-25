@@ -219,3 +219,99 @@ npm start
 
 And a browser window will open to `localhost:3000` with the message we sent
 from express appearing in our react app!
+
+## database connection
+
+Now that we have the ern part of our mern application put together, let's
+add a database. For this, I recommend using
+[MongoDB Atlas](https://www.mongodb.com/cloud/atlas) which
+will host up to 512 MB of data free, will prevent you from having to run your
+own mongo database, and will allow your team to share the data in the database
+easily.
+
+To get started, create an account and click build a cluster. You should
+be able to leave all the default options selected, but before you click
+create cluster at the bottom, ensure that the cost is free. It will take some
+time for your cluster to launch.
+
+While that's working, we'll need to add some code to our server that will
+connect to the database, send data to the react app, and allow us to change
+data. To the top of `sever.js` add
+
+```javascript
+const mongoose = require("mongoose")
+const credentials = require("./credentials")
+const Data = require("./data")
+```
+
+and after we call `const app = express()`, add
+
+```javascript
+mongoose.connect(credentials.dbRoute, {useNewUrlParser: true})
+let db = mongoose.connection
+
+db.once("open", () => console.log("Connected to the database."))
+db.on("error", console.error.bind(console, "MongoDB connection error:"))
+```
+
+These lines will let us connect to the database and notify us when we're
+connected, or if we encounter any unexpected errors. Along with this, we'll
+need to create a couple more files.
+
+First, create a file in the main directory called `data.js`. This will hold
+the *data schema* of our database, essentially the structure of information.
+
+In this file, we'll add
+
+```javascript
+const mongoose = require('mongoose')
+const Schema = mongoose.Schema
+
+const DataSchema = new Schema(
+  {
+    id: Number,
+    message: String
+  },
+  {timestamps: true}
+)
+
+module.exports = mongoose.model("Data", DataSchema)
+```
+
+All we've done is define a data schema that has an id which is a number and
+a message, which is a string. We then export that schema so that we can
+import it in `server.js` with the line `const Data = require(./data)`.
+
+Now, we'll create `credentials.js`. This file will hold the connection link
+to our database. Hopefully the database cluster has been spun up by now, but
+if not you can move on and come back to this section later. The reason we
+keep the connection link here is because it holds all the information necessary
+for **anyone** to access your database, so we don't want to push it to GitHub
+(this also means you'll need to communicate it to your team in some other way).
+
+Before editing `credentials.js`, go back to your Atlas account and click
+the connect button on your cluster. You'll need to whitelist your IP (as
+well as the IP of any teammates who will be accessing it) and add a user.
+Be sure to save the user credentials. After this, click choose a connection
+method, and select connect your application. You should then be able to select
+the short SRV connection string and copy it.
+
+Now, in `credentials.js`, add the following
+
+```javascript
+const dbRoute = "<connection string with user password inserted>"
+
+module.exports = {dbRoute: dbRoute}
+```
+
+Finally, we'll want to add a line to `.gitignore` to indicate that our
+credentials file shouldn't be pushed, so insert
+
+```
+credentials.js
+```
+
+on a new line in the `.gitignore` in the main project directory.
+
+You should now be able to run the server with `node server.js` and see
+the console output `Connected to the database`.
