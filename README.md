@@ -29,7 +29,7 @@ you're good to go. If not, run this command.
 /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 ```
 
-With brew installed, we'll now run the following command (the first may take a while
+With brew installed, we'll now run the following command (it may take a while
 to complete).
 
 ```
