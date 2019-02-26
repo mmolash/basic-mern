@@ -18,6 +18,8 @@ npm start
 ```
 
 ## preparation
+
+### mac
 To get ready to make our basic app, we're gonna need some packages installed.
 First, homebrew, a mac and linux package manager. First, check if it's already
 installed by opening terminal and typing `brew`. If you see a list of commands,
@@ -32,13 +34,25 @@ to complete).
 
 ```
 brew install node
-npm install --global create-react-app
 ```
+
+### windows
+We'll need some basics installed for the rest of the tutorial. Visit
+(this link)[https://nodejs.org/en/download/] and install the latest version
+of node. From now on, whenever typing commands in terminal, use the node.js
+command prompt that installed.
 
 ## front end
 
-Now that we have these installed, we can create the react app using (you guessed it)
-create-react-app. To do this, type in terminal
+With our preparation done, we'll need to install one more package. In terminal,
+run
+
+```
+npm install --global create-react-app
+```
+
+Now we can create the react app using (you guessed it) create-react-app. To do
+this, type in terminal
 
 ```
 create-react-app client
