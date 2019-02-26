@@ -1,5 +1,11 @@
 # basic-mern
-A demonstration of how to implement a basic MERN application
+A demonstration of how to implement a basic MERN application.
+
+The application can be run from the project directory using
+
+```
+npm start
+```
 
 ## preparation
 To get ready to make our basic app, we're gonna need some packages installed.
