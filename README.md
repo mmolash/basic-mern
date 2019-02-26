@@ -1,9 +1,19 @@
 # basic-mern
 A demonstration of how to implement a basic MERN application.
 
-The application can be run from the project directory using
+To run the application, you'll first need to add a file `credentials.js` to
+the main project directory with the following
+
+```javascript
+const dbRoute = <mongo db connection string uri>
+
+module.exports = {dbRoute: dbRoute}
+```
+
+The application can then be run from the project directory using
 
 ```
+npm install
 npm start
 ```
 
