@@ -239,14 +239,18 @@ connect to the database, send data to the react app, and allow us to change
 data. To the top of `sever.js` add
 
 ```javascript
-const mongoose = require("mongoose")
-const credentials = require("./credentials")
-const Data = require("./data")
+const bodyParser = require('body-parser')
+const mongoose = require('mongoose')
+const credentials = require('./credentials')
+const Data = require('./data')
 ```
 
 and after we call `const app = express()`, add
 
 ```javascript
+app.use(bodyParser.urlencoded({extended: false}))
+app.use(bodyParser.json())
+
 mongoose.connect(credentials.dbRoute, {useNewUrlParser: true})
 let db = mongoose.connection
 
@@ -269,7 +273,6 @@ const Schema = mongoose.Schema
 
 const DataSchema = new Schema(
   {
-    id: Number,
     message: String
   },
   {timestamps: true}
@@ -278,8 +281,9 @@ const DataSchema = new Schema(
 module.exports = mongoose.model("Data", DataSchema)
 ```
 
-All we've done is define a data schema that has an id which is a number and
-a message, which is a string. We then export that schema so that we can
+All we've done is define a data schema that has a message, which is a string.
+Also note every mongoDB document by default has a field called `_id`, which
+is a unique identifier. We then export that schema so that we can
 import it in `server.js` with the line `const Data = require(./data)`.
 
 Now, we'll create `credentials.js`. This file will hold the connection link
@@ -315,3 +319,156 @@ on a new line in the `.gitignore` in the main project directory.
 
 You should now be able to run the server with `node server.js` and see
 the console output `Connected to the database`.
+
+## database routes
+
+Let's now make the app actually display and change some data from the database.
+To do this, we need to add some routes to the server that our react app can call.
+Open up `server.js` and replace our current `app.get()` with the following
+
+```javascript
+app.post("/write_data", (req, res) => {
+  let data = new Data()
+  const {message} = req.body
+
+  if (!message) return res.json({success: false, error: "Invalid input."})
+
+  data.message = message
+  data.save(err => {
+    if (err) return res.json({success: false, error: err})
+    return res.json({success: true})
+  })
+})
+
+app.get("/get_data", (req, res) => {
+  Data.find((err, data) => {
+    if (err) return res.json({success: false, error: err})
+    return res.json({success: true, data: data})
+  })
+})
+```
+
+We've added a couple functions. One will write data to the database that is
+sent in the body of a request to the URL. The other will return data from the
+database (all the data in the database in this case).
+
+To see this in effect, let's use these routes in our react app. First we need
+to install a package that will let us interact with the *post* function that
+we put in our app. Open terminal to your home directory and type
+
+```
+cd client
+npm install --save axios
+```
+
+Now open up `App.js` and delete the code from within `componentDidMount()`.
+You can also delete the `callBackendAPI()` function. Now let's write a few
+functions to call our backend routes. At the top of the file, add
+
+```javascript
+import axios from "axios";
+```
+
+Then inside the class `App` add these new functions
+
+```javascript
+getDataFromDB = () => {
+  fetch('/get_data')
+    .then((data) => data.json())
+    .then((res) => this.setState({data: res.data}))
+}
+
+writeDataToDB = (message) => {
+  axios.post('/write_data', {message: message})
+    .then(() => this.getDataFromDB())
+}
+```
+
+Ok, so these functions simply call our api with the necessary information
+and update our state with the response (which will make react re-render
+our website).
+
+We still need to add some code to display the elements on the page that will
+let us interact with the api. Again in `App.js`, edit the return statement to
+
+```javascript
+return(
+  <div>
+    <div>
+      <ul>
+        {this.state.data.length <= 0
+          ? "No entries in database yet."
+          : this.state.data.map(dat => (
+            <li style={{padding: "10px"}} key={this.state.data.message}>
+              <span style={{color: "gray"}}> id: </span> {dat.id} <br/>
+              <span style={{color: "gray"}}> data: </span> {dat.message}
+            </li>
+          ))}
+      </ul>
+    </div>
+    <div style={{padding: "10px"}}>
+      <input type="text" onChange={(e) => this.setState({ message: e.target.value })}
+        placeholder="add something in the database" style={{width: "200px"}}/>
+      <button onClick={() => this.writeDataToDB(this.state.message)}>add</button>
+    </div>
+    <div style={{padding: "10px"}}>
+      <button onClick={() => this.getDataFromDB()}>load</button>
+    </div>
+  </div>
+)
+```
+
+This again looks like quite a bit of code, but most of it is just HTML and some
+styling. The important parts are a list that maps each entry in the data we
+load to an element in the list, each of which shows the id and the data stored.
+The next is an input that stores its current value in our state and a button
+that writes that current value to the database when clicked. Finally, we have
+a button that loads all our data from the database.
+
+If you remember our state, we didn't actually have a message field and our
+data was null, not a list. So, let's edit the state to have a couple more fields
+
+```javascript
+state = {
+  data: [],
+  message: null
+}
+```
+
+We can now run the app and see ourselves interact with the database. As a
+reminder, we can run the program by typing `npm start` in the main directory.
+Then, type something in the input box, click add, and click load. You should
+see the message that indicates no entries in the database replaced with
+id 0 and your message.
+
+If you restart the app and run it again, you'll see that it still indicates
+we have no entries in the database. To fix this, we'll change the
+`componentDidMount()` function we deleted the contents from earlier. Place the
+following in it
+
+```javascript
+this.getDataFromDB()
+```
+
+If you restart the app now, you'll see the data populated without clicking
+the load button.
+
+That's it, you now have a working MERN app, congratulations! As an exercise,
+try to add a couple more pieces of functionality to the app. Specifically, the
+ability to delete entries from the database (given their ID) and the ability
+to update entries in the database (given their ID and a new message).
+
+For delete, you'll need to add a new route in your server (define it with
+`app.delete()`) that calls the `Data.findByIdAndDelete()` function which you can
+learn more about
+[here](https://mongoosejs.com/docs/api.html#model_Model.findByIdAndDelete).
+You'll also need to add a new input box and button to the react app, which
+calls your new server route.
+
+For update, you'll again need a new server route (this time use `app.post()`)
+that calls the `Data.findByIdAndUpdate()` function which you can learn more
+about [here](https://mongoosejs.com/docs/api.html#model_Model.findByIdAndUpdate).
+For this, you'll need to add two new input boxes and a button to the react app.
+
+If you get stuck, the code with this functionality is in this repository,
+but try to figure it out on your own first.
