@@ -38,7 +38,7 @@ brew install node
 
 ### windows
 We'll need some basics installed for the rest of the tutorial. Visit
-(this link)[https://nodejs.org/en/download/] and install the latest version
+[this link](https://nodejs.org/en/download/) and install the latest version
 of node. From now on, whenever typing commands in terminal, use the cmd
 application.
 
