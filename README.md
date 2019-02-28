@@ -430,7 +430,7 @@ return(
           ? "No entries in database yet."
           : this.state.data.map(dat => (
             <li style={{padding: "10px"}} key={this.state.data.message}>
-              <span style={{color: "gray"}}> id: </span> {dat.id} <br/>
+              <span style={{color: "gray"}}> id: </span> {dat._id} <br/>
               <span style={{color: "gray"}}> data: </span> {dat.message}
             </li>
           ))}
